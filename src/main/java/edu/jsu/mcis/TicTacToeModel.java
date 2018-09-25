@@ -32,7 +32,7 @@ public class TicTacToeModel {
         
         X("X"), 
         O("O"), 
-        TIE("Tie"), 
+        TIE("TIE"), 
         NONE("none");
 
         private String message;

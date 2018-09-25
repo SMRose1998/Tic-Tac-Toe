@@ -1,61 +1,103 @@
 package edu.jsu.mcis;
 
-public class TicTacToeView {
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import edu.jsu.mcis.TicTacToeModel.Mark;
+import edu.jsu.mcis.TicTacToeModel.Result;
 
-    private TicTacToeModel model;
-    
-    /* CONSTRUCTOR */
+public class TicTacToeView extends JPanel implements ActionListener {
 	
+    TicTacToeModel model;
+
+    private JButton[][] squares;
+    private JPanel squaresPanel;
+    private JLabel resultLabel;
+	private int row;
+	private int col;
+
+
     public TicTacToeView(TicTacToeModel model) {
-        
+
         this.model = model;
+
+        int width = model.getWidth();
+
+        this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+        squares = new JButton[width][width];
+        squaresPanel = new JPanel(new GridLayout(width,width));
+        resultLabel = new JLabel();
+        resultLabel.setName("ResultLabel");
         
-    }
-	
-    public void viewModel() {
+        for (int row = 0; row < width; row++){
+            
+            for (int col = 0; col < width; col++){
+                
+                squares[row][col] = new JButton(); 
+                squares[row][col].addActionListener(this);
+                squares[row][col].setName("Square" + row + col);
+                squares[row][col].setPreferredSize(new Dimension(64,64));
+                squaresPanel.add(squares[row][col]);
+                
+            }
+            
+        }
+
+        this.add(squaresPanel);
+        this.add(resultLabel);
         
-        /* Print the board to the console (see examples) */
-        System.out.println("  012");
-		System.out.println();
-		for(int i = 0; i<model.getWidth(); i++){
-			System.out.print(i);
-			System.out.print(" ");
-			for(int j = 0; j<model.getWidth(); j++){
-				System.out.print(model.getMark(i,j));
-			}
-			System.out.println();
-		}
+        resultLabel.setText("Welcome to Tic-Tac-Toe!");
 
     }
 
-    public void showNextMovePrompt() {
-
-        /* Display a prompt for the player's next move (see examples) */
+    @Override
+    public void actionPerformed(ActionEvent event) {
+        
+        /* Handle button clicks.  Extract the row and col values from the name
+           of the button that was clicked, then make the mark in the grid using
+           the Model's "makeMark()" method.  Finally, use the "updateSquares()"
+           method to refresh the View.  If the game is over, show the result
+           (from the Model's "getResult()" method) in the result label. */
+        
+        String name = ((JButton) event.getSource()).getName(); // Get button name
+        
 		
-		if(model.isXTurn()){
-			System.out.println("Player 1 (X) Move:");
-		}else{
-			System.out.println("Player 2 (O) Move:");
+		//Get/ Set the row number
+        row = Integer.parseInt(name.substring(6,7));
+		this.row = row;
+		//Get/ Set the col number
+		col = Integer.parseInt(name.substring(7,8));
+		this.col = col;
+		
+		
+		//Check if the model has NOT triggered GameOver
+		if(!model.isGameover()){
+			
+			//On button click, if game is continuing, edit the model data to include
+			//A mark on the button the player pressed
+			model.makeMark(row,col);
+			
+			//Change the GUI to reflect the model
+			updateSquares();
+			
+			//Display results
+			Result result = model.getResult();
+			resultLabel.setText(result.toString());
 		}
-		System.out.print("Enter the row and column numbers, separated by a space: ");
-
 
     }
+        
+    public void updateSquares() {
 
-    public void showInputError() {
-
-        /* Display an error if input is invalid (see examples) */
-
-        System.out.println("Error - Incorrect input");
-
-    }
-
-    public void showResult(String r) {
-
-        /* Display final winner */
-
-        System.out.println(r + "!");
+        /* Loop through all View buttons and (re)set the text of each button
+           to reflect the grid contents (use the Model's "getMark()" method). */
+		Mark buttonText = model.getMark(this.row, this.col);
+		squares[this.row][this.col].setText(buttonText.toString());
 
     }
-	
+        
+    public void showResult(String message) {
+        resultLabel.setText(message);
+    }
+
 }
